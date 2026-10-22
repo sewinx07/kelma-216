@@ -1,0 +1,49 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+
+    <!-- Soft cream backdrop -->
+    <path
+        android:pathData="M20,120 a100,100 0 1,0 200,0 a100,100 0 1,0 -200,0"
+        android:fillColor="#FFF4E8" />
+
+    <!-- Turquoise decorative ring -->
+    <path
+        android:pathData="M28,120 a92,92 0 1,0 184,0 a92,92 0 1,0 -184,0"
+        android:fillColor="#00000000"
+        android:strokeColor="#49C5C6"
+        android:strokeWidth="6" />
+
+    <!-- Fried pastry triangle (rounded joins) -->
+    <path
+        android:pathData="M120,58 L184,180 L56,180 Z"
+        android:fillColor="#F2B33D"
+        android:strokeColor="#D9922B"
+        android:strokeWidth="7"
+        android:strokeLineJoin="round" />
+
+    <!-- Lighter highlight surface -->
+    <path
+        android:pathData="M120,74 L166,166 L74,166 Z"
+        android:fillColor="#50FFD786"
+        android:strokeColor="#00000000" />
+
+    <!-- Fold crease -->
+    <path
+        android:pathData="M120,58 L120,180"
+        android:strokeColor="#C9821F"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+
+    <!-- Fried texture bubbles -->
+    <path android:pathData="M104,148 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" android:fillColor="#C9821F" />
+    <path android:pathData="M134,158 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#C9821F" />
+    <path android:pathData="M96,170 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" android:fillColor="#C9821F" />
+
+    <!-- Filling peeking through: parsley + egg -->
+    <path android:pathData="M128,132 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" android:fillColor="#5CB85C" />
+    <path android:pathData="M140,140 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#FFC74B" />
+</vector>
