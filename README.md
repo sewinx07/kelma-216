@@ -9,6 +9,15 @@ débloque progressivement tout le pays.
 
 Application : `tn.kelma216.game` · Kotlin · Jetpack Compose · Material 3 · minSdk 24
 
+## Aperçu
+
+Captures réelles de l'application (émulateur Pixel, 1080 × 2424) :
+
+- [Accueil](docs/screenshots/home.png)
+- [Carte des gouvernorats](docs/screenshots/map.png)
+- [Profil](docs/screenshots/profile.png)
+- [Énigme](docs/screenshots/puzzle.png)
+
 ---
 
 ## Sommaire
