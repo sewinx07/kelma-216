@@ -22,7 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,8 +82,9 @@ fun AnswerSlot(
     val background by animateColorAsState(targetBackground, tween(180), label = "slotBg")
     val borderColor by animateColorAsState(targetBorder, tween(180), label = "slotBorder")
 
-    // Small pop when a letter is placed/removed; cheap and short so it stays snappy.
+    // Small pop when a letter is placed; a quick pulse when it is returned to the tray.
     val pop = remember { Animatable(1f) }
+    var wasFilled by remember { mutableStateOf(false) }
     LaunchedEffect(char) {
         if (char != null) {
             pop.snapTo(0.78f)
@@ -92,7 +95,11 @@ fun AnswerSlot(
                     stiffness = Spring.StiffnessMediumLow,
                 ),
             )
+        } else if (wasFilled) {
+            pop.snapTo(1.06f)
+            pop.animateTo(1f, tween(140))
         }
+        wasFilled = char != null
     }
 
     Box(
@@ -165,8 +172,15 @@ fun LetterTile(
                 scaleX = scale
                 scaleY = scale
             }
-            .clickable(enabled = !used, onClick = onClick)
-            .semantics { contentDescription = "Lettre $letter" },
+            // Used tiles stay clickable: tapping one again returns it to the tray.
+            .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = if (used) {
+                    "Lettre $letter placée, toucher pour retirer"
+                } else {
+                    "Lettre $letter"
+                }
+            },
         contentAlignment = Alignment.TopCenter,
     ) {
         // Base / depth layer

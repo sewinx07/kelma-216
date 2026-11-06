@@ -55,7 +55,12 @@ fun KelmaApp() {
                 viewModel = viewModel,
                 govId = govId,
                 onBack = { navController.popBackStack() },
-                onStartPuzzle = { puzzleId -> navController.navigate(Routes.puzzle(puzzleId)) },
+                onStartPuzzle = { puzzleId ->
+                    // Fresh attempt every time a puzzle is opened from the level list;
+                    // completed missions replay without touching saved progress.
+                    viewModel.closeSession()
+                    navController.navigate(Routes.puzzle(puzzleId))
+                },
                 onCompletion = { id -> navController.navigate(Routes.completion(id)) },
             )
         }

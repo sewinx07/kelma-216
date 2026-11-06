@@ -197,6 +197,8 @@ fun GovernorateScreen(
                         !completed &&
                         unlocked &&
                         GameRules.isPuzzlePositionAvailable(govId, position, gameState)
+                    // Solved missions stay open for replay; progress is never touched.
+                    val replayable = completed && unlocked
 
                     PuzzleSlotRow(
                         position = position,
@@ -204,7 +206,10 @@ fun GovernorateScreen(
                         hasContent = puzzle != null,
                         completed = completed,
                         available = available,
-                        onClick = { if (available) puzzle?.let { onStartPuzzle(it.id) } },
+                        replayable = replayable,
+                        onClick = {
+                            if (available || replayable) puzzle?.let { onStartPuzzle(it.id) }
+                        },
                     )
                 }
             }
@@ -241,6 +246,7 @@ private fun PuzzleSlotRow(
     hasContent: Boolean,
     completed: Boolean,
     available: Boolean,
+    replayable: Boolean,
     onClick: () -> Unit,
 ) {
     val container = when {
@@ -260,7 +266,7 @@ private fun PuzzleSlotRow(
             .clip(RoundedCornerShape(16.dp))
             .background(container)
             .border(2.dp, border, RoundedCornerShape(16.dp))
-            .clickable(enabled = available, onClick = onClick)
+            .clickable(enabled = available || replayable, onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -301,7 +307,17 @@ private fun PuzzleSlotRow(
         }
 
         when {
-            completed -> CheckIcon(tint = MidnightBlue)
+            completed -> Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = "Rejouer",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MidnightBlue.copy(alpha = 0.8f),
+                )
+                CheckIcon(tint = MidnightBlue)
+            }
             available -> Text(
                 text = "Jouer",
                 style = MaterialTheme.typography.labelLarge,

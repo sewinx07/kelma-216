@@ -31,6 +31,8 @@ data class PuzzleSession(
     /** Slots revealed by a paid hint; these are locked and cannot be cleared. */
     val lockedSlots: Set<Int>,
     val phase: PuzzlePhase = PuzzlePhase.INPUT,
+    /** True when this attempt replays a mission that was already completed. */
+    val isReplay: Boolean = false,
 )
 
 /**
@@ -77,7 +79,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             _message.value = "Contenu à venir pour cette énigme."
             return
         }
-        if (_session.value?.puzzle?.id == puzzle.id) return // already loaded, keep progress
+        // Reuse an ongoing attempt (e.g. after a rotation). [closeSession] runs whenever
+        // the player opens a puzzle from the level list, so entry always starts clean.
+        val existing = _session.value
+        val keepOngoingAttempt = existing != null &&
+            existing.puzzle.id == puzzle.id &&
+            existing.phase == PuzzlePhase.INPUT
+        if (keepOngoingAttempt) return
 
         val tiles = TileGenerator.build(puzzle)
         if (tiles.isEmpty()) {
@@ -94,6 +102,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             slotSource = List(answerChars.size) { null },
             lockedSlots = emptySet(),
             phase = PuzzlePhase.INPUT,
+            isReplay = _gameState.value.isPuzzleCompleted(puzzle.id),
         )
     }
 
@@ -106,12 +115,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _session.value = transform(current)
     }
 
-    /** Fills the leftmost empty slot with the tapped tile. Ignores already-used tiles. */
+    /** Taps a tray letter: places it, or takes it back out if it is already placed. */
     fun selectTile(tileId: String) {
         updateSession { s ->
             if (s.phase != PuzzlePhase.INPUT) return@updateSession s
             val tile = s.tiles.firstOrNull { it.id == tileId } ?: return@updateSession s
-            if (s.slotSource.any { it == tileId }) return@updateSession s // never select a tile twice
+
+            // Method B: tapping the same letter again removes it from its slot.
+            // slotSource maps one tile id to exactly one slot, so repeated letters
+            // can never remove the wrong occurrence.
+            val placedAt = s.slotSource.indexOf(tileId)
+            if (placedAt != -1) return@updateSession clearSlot(s, placedAt)
+
             val target = s.slots.indexOfFirst { it == null }
             if (target == -1) return@updateSession s
             val slots = s.slots.toMutableList().also { it[target] = tile.char }
@@ -120,15 +135,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Single removal operation shared by both undo gestures (tapping a filled answer
+     * slot and tapping an already-placed tile). Hint-locked slots are immune.
+     */
+    private fun clearSlot(s: PuzzleSession, slotIndex: Int): PuzzleSession {
+        if (slotIndex in s.lockedSlots) return s
+        if (slotIndex !in s.slots.indices || s.slots[slotIndex] == null) return s
+        val slots = s.slots.toMutableList().also { it[slotIndex] = null }
+        val source = s.slotSource.toMutableList().also { it[slotIndex] = null }
+        return s.copy(slots = slots, slotSource = source)
+    }
+
     /** Clears a filled slot, returning its tile to the tray. Hint-locked slots are immune. */
     fun deselectSlot(slotIndex: Int) {
         updateSession { s ->
             if (s.phase != PuzzlePhase.INPUT) return@updateSession s
-            if (slotIndex in s.lockedSlots) return@updateSession s
-            if (slotIndex !in s.slots.indices || s.slots[slotIndex] == null) return@updateSession s
-            val slots = s.slots.toMutableList().also { it[slotIndex] = null }
-            val source = s.slotSource.toMutableList().also { it[slotIndex] = null }
-            s.copy(slots = slots, slotSource = source)
+            clearSlot(s, slotIndex)
         }
     }
 
@@ -195,8 +218,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val target = s.slots.indices.firstOrNull { i ->
             i !in s.lockedSlots && (s.slots[i] == null || s.slots[i] != answerChars[i])
         } ?: return
+        // Consume one matching tray tile so the revealed letter cannot be placed twice.
+        val consumedTileId = s.tiles
+            .firstOrNull { it.char == answerChars[target] && it.id !in s.slotSource }
+            ?.id
         val slots = s.slots.toMutableList().also { it[target] = answerChars[target] }
-        val source = s.slotSource.toMutableList().also { it[target] = null }
+        val source = s.slotSource.toMutableList().also { it[target] = consumedTileId }
         _session.value = s.copy(
             slots = slots,
             slotSource = source,

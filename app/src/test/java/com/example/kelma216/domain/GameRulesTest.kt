@@ -64,6 +64,21 @@ class GameRulesTest {
         assertEquals(1, second.completedPuzzleIds.size)
     }
 
+    @Test
+    fun replayingCompletedMissionKeepsProgressAndCoins() {
+        val first = tunis.firstOrNull() ?: error("Tunis content missing")
+        val second = tunis.getOrNull(1) ?: error("Second Tunis puzzle missing")
+        val afterFirst = GameRules.completePuzzle(GameState(coins = 100), first)
+        assertTrue(GameRules.isPuzzlePositionAvailable("tunis", second.position, afterFirst))
+
+        // Replaying mission 1 must be a no-op on saved progress.
+        val afterReplay = GameRules.completePuzzle(afterFirst, first)
+        assertEquals(afterFirst, afterReplay)
+        assertEquals(100 + first.reward, afterReplay.coins)
+        assertFalse(afterReplay.isPuzzleCompleted(second.id))
+        assertTrue(GameRules.isPuzzlePositionAvailable("tunis", second.position, afterReplay))
+    }
+
     // --- hints --------------------------------------------------------------
 
     @Test

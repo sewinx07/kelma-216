@@ -213,35 +213,32 @@ private fun PuzzleContent(
                         )
                     }
                 } else {
-                    // No photo sourced yet: show the text clue clearly and honestly.
+                    // No photo sourced yet: the devinette is the clue. No letter count,
+                    // no hint that would give the answer away.
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 26.dp, horizontal = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(Turquoise.copy(alpha = 0.16f))
+                                .padding(horizontal = 14.dp, vertical = 4.dp),
+                        ) {
+                            Text(
+                                text = "Devinette",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MidnightBlue,
+                            )
+                        }
                         Text(
                             text = puzzle.clueCaption ?: "Trouve le mot",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MidnightBlue,
                             textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = "${puzzle.answer.length} lettres",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Turquoise,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                puzzle.clueCaption?.let { caption ->
-                    if (puzzle.clueRes != null) {
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = caption,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MidnightBlue.copy(alpha = 0.7f),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -258,20 +255,7 @@ private fun PuzzleContent(
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
-
-            Text(
-                text = if (puzzle.clueRes != null) {
-                    "Observe l'image et forme le mot à partir des lettres ci-dessous."
-                } else {
-                    "Forme le mot à partir des lettres ci-dessous."
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = MidnightBlue,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(18.dp))
 
             // --- Playing board: answer slots + letter tray -------------
             KelmaCard(
@@ -388,6 +372,7 @@ private fun PuzzleContent(
         CorrectOverlay(
             puzzle = puzzle,
             gameState = gameState,
+            isReplay = session.isReplay,
             onNextPuzzle = onNextPuzzle,
             onCompletion = onCompletion,
             onBack = onBack,
@@ -399,6 +384,7 @@ private fun PuzzleContent(
 private fun CorrectOverlay(
     puzzle: com.example.kelma216.data.model.Puzzle,
     gameState: com.example.kelma216.data.model.GameState,
+    isReplay: Boolean,
     onNextPuzzle: (String) -> Unit,
     onCompletion: (String) -> Unit,
     onBack: () -> Unit,
@@ -448,11 +434,20 @@ private fun CorrectOverlay(
                 color = Color(0xFFFFF4E8),
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CoinDotReward(amount = puzzle.reward)
+            if (isReplay) {
+                Text(
+                    text = "Mission déjà validée · aucun bonus supplémentaire",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Yellow,
+                    textAlign = TextAlign.Center,
+                )
+            } else {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CoinDotReward(amount = puzzle.reward)
+                }
             }
 
             PatternStrip(height = 16.dp)
