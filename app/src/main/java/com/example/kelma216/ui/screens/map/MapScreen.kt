@@ -104,10 +104,9 @@ fun MapScreen(
             CoinBadge(coins = gameState.coins)
         }
 
-        // Honest limitation note (presentation page 22 says the detailed map is to be finalised).
         Text(
-            text = "Carte sélective : le découpage géographique illustré des 24 gouvernorats sera " +
-                "finalisé en maquette. Sélectionnez un gouvernorat pour jouer.",
+            text = "Sélectionne un gouvernorat pour découvrir ses 9 énigmes. " +
+                "Les régions se débloquent au fil de l'aventure.",
             style = MaterialTheme.typography.bodyMedium,
             color = MidnightBlue.copy(alpha = 0.75f),
             textAlign = TextAlign.Center,
