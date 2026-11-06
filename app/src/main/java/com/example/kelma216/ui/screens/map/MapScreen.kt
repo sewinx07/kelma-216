@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +41,7 @@ import com.example.kelma216.domain.GovernorateProgress
 import com.example.kelma216.ui.components.BackIcon
 import com.example.kelma216.ui.components.CheckIcon
 import com.example.kelma216.ui.components.CoinBadge
+import com.example.kelma216.ui.components.GovernorateCover
 import com.example.kelma216.ui.components.LockIcon
 import com.example.kelma216.ui.components.PuzzleDots
 import com.example.kelma216.ui.theme.Cream
@@ -84,7 +87,8 @@ fun MapScreen(
                     .size(44.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface)
-                    .clickable(onClick = onBack),
+                    .clickable(onClick = onBack)
+                    .semantics { contentDescription = "Retour" },
                 contentAlignment = Alignment.Center,
             ) {
                 BackIcon(tint = MidnightBlue)
@@ -144,7 +148,7 @@ private fun GovernorateCard(
 ) {
     val complete = progress.complete
     val container = when {
-        complete -> Yellow
+        complete -> SoftCream
         unlocked -> SoftCream
         else -> Cream
     }
@@ -156,71 +160,129 @@ private fun GovernorateCard(
 
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(container)
             .border(2.dp, borderColor, RoundedCornerShape(18.dp))
-            .clickable(enabled = unlocked, onClick = onClick)
-            .padding(14.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .clickable(enabled = unlocked, onClick = onClick),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        // --- Cover photo (hand-managed asset, neutral placeholder when missing) ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(104.dp),
         ) {
-            // Order number
+            GovernorateCover(
+                governorateId = governorate.id,
+                modifier = Modifier.fillMaxSize(),
+                cornerRadius = 0.dp,
+                contentDescription = "Photo de ${governorate.name}",
+            )
+
+            // Dark scrim keeps the badges readable on any photograph.
             Box(
                 modifier = Modifier
-                    .size(34.dp)
+                    .fillMaxSize()
+                    .background(
+                        androidx.compose.ui.graphics.Brush.verticalGradient(
+                            listOf(
+                                Color.Black.copy(alpha = 0.32f),
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.18f),
+                            ),
+                        ),
+                    ),
+            )
+
+            // Order badge
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+                    .size(30.dp)
                     .clip(CircleShape)
-                    .background(if (unlocked) MidnightBlue else LockedGrey),
+                    .background(if (unlocked) MidnightBlue else MidnightBlue.copy(alpha = 0.75f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = "%02d".format(governorate.order),
-                    color = Color(0xFFFFF4E8),
-                    fontSize = 13.sp,
+                    color = Cream,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
+
             if (complete) {
-                CheckIcon(tint = MidnightBlue)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(Yellow),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CheckIcon(tint = MidnightBlue, modifier = Modifier.size(16.dp))
+                }
             } else if (!unlocked) {
-                LockIcon(tint = MidnightBlue.copy(alpha = 0.7f))
+                // Lock scrim: the region stays visible, but is clearly not playable yet.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MidnightBlue.copy(alpha = 0.38f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Cream.copy(alpha = 0.92f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        LockIcon(tint = MidnightBlue)
+                    }
+                }
             }
         }
 
-        Text(
-            text = governorate.name,
-            style = MaterialTheme.typography.titleMedium,
-            color = MidnightBlue,
-            maxLines = 1,
-        )
+        // --- Text block ----------------------------------------------------------
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = governorate.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = MidnightBlue,
+                maxLines = 1,
+            )
 
-        if (!unlocked) {
-            Text(
-                text = "À débloquer",
-                style = MaterialTheme.typography.labelMedium,
-                color = MidnightBlue.copy(alpha = 0.6f),
-            )
-        } else if (progress.totalPlayable == 0) {
-            Text(
-                text = "Contenu à venir",
-                style = MaterialTheme.typography.labelMedium,
-                color = MidnightBlue.copy(alpha = 0.6f),
-            )
-        } else {
-            Text(
-                text = "${progress.displaySolved} / ${progress.displayTotal}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MidnightBlue.copy(alpha = 0.8f),
-            )
-            PuzzleDots(
-                totalSlots = progress.displayTotal,
-                solvedCount = progress.displaySolved,
-                hasContent = progress.totalPlayable > 0,
-            )
+            when {
+                !unlocked -> Text(
+                    text = "À débloquer",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MidnightBlue.copy(alpha = 0.6f),
+                )
+
+                progress.totalPlayable == 0 -> Text(
+                    text = "Contenu à venir",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MidnightBlue.copy(alpha = 0.6f),
+                )
+
+                else -> {
+                    Text(
+                        text = "${progress.displaySolved} / ${progress.displayTotal} énigmes",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MidnightBlue.copy(alpha = 0.8f),
+                    )
+                    PuzzleDots(
+                        totalSlots = progress.displayTotal,
+                        solvedCount = progress.displaySolved,
+                        hasContent = progress.totalPlayable > 0,
+                    )
+                }
+            }
         }
     }
 }

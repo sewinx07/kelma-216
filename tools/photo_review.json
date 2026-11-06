@@ -1,0 +1,157 @@
+[
+  {
+    "answer": "MEDINA",
+    "subject": "Medina of Tunis",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "SAHFA",
+    "subject": "Sahfa dish",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "RADES",
+    "subject": "Fort of Rades",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "HAMMAM",
+    "subject": "Hammam",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "FRAISE",
+    "subject": "Strawberry",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "BLE",
+    "subject": "Wheat",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "FACULTE",
+    "subject": "University",
+    "reason": "override-not-usable"
+  },
+  {
+    "answer": "DATTES",
+    "subject": "Dates",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "CERAMIQUE",
+    "subject": "Ceramic tile",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "PORT",
+    "subject": "Port of Bizerte",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "CANAL",
+    "subject": "Bizerte canal",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "VRAQUIER",
+    "subject": "Cargo ship",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "MOULIN",
+    "subject": "Windmill",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "CHENE",
+    "subject": "Oak tree",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "LIEGE",
+    "subject": "Cork",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "DOLMEN",
+    "subject": "Dolmen",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "TABLE",
+    "subject": "Stone table",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "MONT",
+    "subject": "Mount",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "MOUSTACH",
+    "subject": "Sousse medina",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "CHANTIER",
+    "subject": "Shipyard",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "DENTELLE",
+    "subject": "Lace",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "ALFA",
+    "subject": "Esparto grass",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "BERBERE",
+    "subject": "Amazigh",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "CAMION",
+    "subject": "Truck",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "MARIAGE",
+    "subject": "Wedding",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "CANAL",
+    "subject": "Canal",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "GRENIER",
+    "subject": "Granary",
+    "reason": "no-usable-photo"
+  },
+  {
+    "answer": "MINE",
+    "subject": "Mine",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "PALMERAIE",
+    "subject": "Palm grove",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "DATTES",
+    "subject": "Date palm",
+    "reason": "download-failed"
+  },
+  {
+    "answer": "DOUZ",
+    "subject": "Douz",
+    "reason": "override-not-usable"
+  }
+]

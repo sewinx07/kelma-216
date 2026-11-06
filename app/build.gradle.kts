@@ -65,6 +65,14 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Hand-managed art drops into app/src/assets (logo, references, governorate covers)
+    // and is bundled as APK assets, so new governorate covers never need a Kotlin change.
+    sourceSets {
+        getByName("main") {
+            assets.srcDir("src/assets")
+        }
+    }
 }
 
 dependencies {

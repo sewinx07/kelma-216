@@ -189,6 +189,8 @@ private fun PuzzleContent(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Spacer(Modifier.height(12.dp))
+
             // --- Clue: photo when available, else a text prompt ------------
             KelmaCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -269,52 +271,71 @@ private fun PuzzleContent(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // --- Answer slots ------------------------------------------
-            AnswerRow(
-                slots = session.slots,
-                lockedSlots = session.lockedSlots,
-                showResult = phase == PuzzlePhase.INCORRECT || phase == PuzzlePhase.CORRECT,
-                allCorrect = phase == PuzzlePhase.CORRECT,
-                onSlotClick = onSlot,
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            when (phase) {
-                PuzzlePhase.INCORRECT -> Text(
-                    text = "Pas encore… réessaie !",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = ErrorRed,
+            // --- Playing board: answer slots + letter tray -------------
+            KelmaCard(
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = com.example.kelma216.ui.theme.SoftCream,
+            ) {
+                AnswerRow(
+                    slots = session.slots,
+                    lockedSlots = session.lockedSlots,
+                    showResult = phase == PuzzlePhase.INCORRECT || phase == PuzzlePhase.CORRECT,
+                    allCorrect = phase == PuzzlePhase.CORRECT,
+                    onSlotClick = onSlot,
                 )
-                else -> Text(
-                    text = "Touche une lettre pour la placer",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MidnightBlue.copy(alpha = 0.6f),
-                )
+
+                Spacer(Modifier.height(10.dp))
+
+                when (phase) {
+                    PuzzlePhase.INCORRECT -> Text(
+                        text = "Pas encore… réessaie !",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = ErrorRed,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    else -> Text(
+                        text = "Touche une lettre pour la placer",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MidnightBlue.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                message?.let {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MidnightBlue,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Letter tray, visually separated from the slots.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(Turquoise.copy(alpha = 0.10f))
+                        .padding(vertical = 10.dp, horizontal = 6.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    TileRow(
+                        tiles = session.tiles,
+                        usedIds = usedIds,
+                        onTileClick = onTile,
+                    )
+                }
             }
 
-            message?.let {
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MidnightBlue,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
             Spacer(Modifier.height(18.dp))
-
-            // --- Letter tiles ------------------------------------------
-            TileRow(
-                tiles = session.tiles,
-                usedIds = usedIds,
-                onTileClick = onTile,
-            )
-
-            Spacer(Modifier.height(24.dp))
 
             // --- Actions -----------------------------------------------
             Row(

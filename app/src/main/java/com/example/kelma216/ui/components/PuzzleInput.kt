@@ -1,22 +1,34 @@
 package com.example.kelma216.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +42,15 @@ import com.example.kelma216.ui.theme.Turquoise
 import com.example.kelma216.ui.theme.TunisianRed
 import com.example.kelma216.ui.theme.Yellow
 
-/** One empty/filled answer box. [char] is null when empty. */
+private val SlotShape = RoundedCornerShape(16.dp)
+private val TileShape = RoundedCornerShape(16.dp)
+
+/**
+ * One empty/filled answer box. [char] is null when empty.
+ *
+ * The visual language mirrors the chunky word-game tiles of the reference art: cream
+ * face, deep midnight outline, and a short pop animation whenever a letter lands.
+ */
 @Composable
 fun AnswerSlot(
     char: Char?,
@@ -40,27 +60,51 @@ fun AnswerSlot(
     isCorrect: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    val background = when {
+    val filled = char != null
+
+    val targetBackground = when {
         locked -> Yellow
         isCorrect -> Color(0xFFB9EBD3)
         isError -> TunisianRed.copy(alpha = 0.15f)
-        char != null -> Cream
+        filled -> Cream
         else -> Color.White
     }
-    val borderColor = when {
+    val targetBorder = when {
         isCorrect -> Color(0xFF2FA96B)
         isError -> TunisianRed
         locked -> Yellow
-        else -> MidnightBlue.copy(alpha = 0.55f)
+        filled -> MidnightBlue
+        else -> MidnightBlue.copy(alpha = 0.45f)
+    }
+
+    val background by animateColorAsState(targetBackground, tween(180), label = "slotBg")
+    val borderColor by animateColorAsState(targetBorder, tween(180), label = "slotBorder")
+
+    // Small pop when a letter is placed/removed; cheap and short so it stays snappy.
+    val pop = remember { Animatable(1f) }
+    LaunchedEffect(char) {
+        if (char != null) {
+            pop.snapTo(0.78f)
+            pop.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                ),
+            )
+        }
     }
 
     Box(
         modifier = modifier
-            .size(56.dp)
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(14.dp))
+            .size(54.dp)
+            .graphicsLayer {
+                scaleX = pop.value
+                scaleY = pop.value
+            }
+            .clip(SlotShape)
             .background(background)
-            .border(width = 2.5.dp, color = borderColor, shape = RoundedCornerShape(14.dp))
+            .border(width = 2.5.dp, color = borderColor, shape = SlotShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .semantics {
                 contentDescription = when {
@@ -71,16 +115,29 @@ fun AnswerSlot(
             },
         contentAlignment = Alignment.Center,
     ) {
+        if (!filled && !locked) {
+            // Faint baseline so empty slots read as "waiting for a letter".
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.42f)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MidnightBlue.copy(alpha = 0.22f)),
+            )
+        }
         Text(
             text = char?.toString() ?: "",
             color = MidnightBlue,
-            fontSize = 26.sp,
+            fontSize = 25.sp,
             fontWeight = FontWeight.ExtraBold,
         )
     }
 }
 
-/** A selectable letter tile in the tray. Disabled once used. */
+/**
+ * A selectable letter tile in the tray. Disabled (faded and slightly shrunk) once used.
+ * Keeps the 3D "button" feel of the reference art via a darker base under the face.
+ */
 @Composable
 fun LetterTile(
     letter: Char,
@@ -88,29 +145,60 @@ fun LetterTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val background = if (used) LockedGrey.copy(alpha = 0.35f) else Turquoise
-    val content = if (used) MidnightBlue.copy(alpha = 0.35f) else MidnightBlue
+    val scale by animateFloatAsState(
+        targetValue = if (used) 0.84f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "tileScale",
+    )
+    val faceColors = if (used) {
+        listOf(LockedGrey.copy(alpha = 0.30f), LockedGrey.copy(alpha = 0.30f))
+    } else {
+        listOf(Color(0xFF74DEDE), Turquoise)
+    }
+    val shadowColor = if (used) LockedGrey.copy(alpha = 0.25f) else Color(0xFF2E9FA0)
+    val content = if (used) MidnightBlue.copy(alpha = 0.30f) else MidnightBlue
 
     Box(
         modifier = modifier
             .size(56.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(background)
-            .border(
-                width = 2.5.dp,
-                color = if (used) LockedGrey else MidnightBlue,
-                shape = RoundedCornerShape(14.dp),
-            )
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clickable(enabled = !used, onClick = onClick)
             .semantics { contentDescription = "Lettre $letter" },
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Text(
-            text = letter.toString(),
-            color = content,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.ExtraBold,
+        // Base / depth layer
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .offset(y = 4.dp)
+                .clip(TileShape)
+                .background(shadowColor),
         )
+        // Face
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .clip(TileShape)
+                .background(Brush.verticalGradient(faceColors))
+                .border(
+                    width = 2.5.dp,
+                    color = if (used) LockedGrey.copy(alpha = 0.5f) else MidnightBlue,
+                    shape = TileShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = letter.toString(),
+                color = content,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.ExtraBold,
+            )
+        }
     }
 }
 
@@ -126,8 +214,8 @@ fun AnswerRow(
 ) {
     FlowRow(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(9.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
         slots.forEachIndexed { index, char ->

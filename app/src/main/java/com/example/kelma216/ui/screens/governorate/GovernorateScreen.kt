@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +39,7 @@ import com.example.kelma216.domain.GameRules
 import com.example.kelma216.ui.components.ButtonVariant
 import com.example.kelma216.ui.components.CheckIcon
 import com.example.kelma216.ui.components.CoinBadge
+import com.example.kelma216.ui.components.GovernorateCover
 import com.example.kelma216.ui.components.KelmaButton
 import com.example.kelma216.ui.components.KelmaTopBar
 import com.example.kelma216.ui.components.LockIcon
@@ -105,30 +107,62 @@ fun GovernorateScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Themed header
-            Column(
+            // Themed cover header: the governorate's own photo (hand-managed asset)
+            // with a soft red gradient so the title stays readable on any image.
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(TunisianRed)
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .height(190.dp)
+                    .clip(RoundedCornerShape(22.dp)),
             ) {
-                Text(
-                    text = "Niveau %02d".format(governorate.order),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Yellow,
+                GovernorateCover(
+                    governorateId = governorate.id,
+                    modifier = Modifier.fillMaxSize(),
+                    cornerRadius = 0.dp,
+                    contentDescription = "Photo de ${governorate.name}",
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = governorate.name,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color(0xFFFFF4E8),
-                    textAlign = TextAlign.Center,
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    MidnightBlue.copy(alpha = 0.25f),
+                                    MidnightBlue.copy(alpha = 0.82f),
+                                ),
+                            ),
+                        ),
                 )
-                Spacer(Modifier.height(10.dp))
-                PatternStrip(height = 16.dp, colors = listOf(Yellow, Turquoise, Color(0xFFFFF4E8)))
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(18.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(TunisianRed)
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            text = "Niveau %02d".format(governorate.order),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Cream,
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = governorate.name,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White,
+                        textAlign = TextAlign.Start,
+                    )
+                }
             }
+
+            Spacer(Modifier.height(12.dp))
+            PatternStrip(height = 8.dp, colors = listOf(Yellow, Turquoise, TunisianRed))
 
             Spacer(Modifier.height(18.dp))
 
